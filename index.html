@@ -201,11 +201,25 @@
 
         /* Avatar Styles */
         .avatar-display {
-            width: 120px;
-            height: 120px;
-            font-size: 3rem;
             position: relative;
+            overflow: hidden; /* Keep parts inside */
         }
+        
+        /* New Cooler & Larger Home Avatar Style */
+        .avatar-large {
+            width: 180px;
+            height: 180px;
+            font-size: 5rem;
+            border: 4px solid var(--accent);
+            box-shadow: 0 0 25px color-mix(in srgb, var(--accent) 30%, transparent);
+            animation: float-avatar 3s ease-in-out infinite;
+        }
+
+        @keyframes float-avatar {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
         .avatar-part {
             position: absolute;
             left: 50%;
@@ -243,7 +257,8 @@
         <!-- Home Screen -->
         <div id="home-screen" class="text-center">
             <div class="flex flex-col items-center">
-                <div id="avatar-display-home" class="avatar-display game-card rounded-full flex items-center justify-center mb-4">
+                <!-- Updated Avatar Display: Larger and animated -->
+                <div id="avatar-display-home" class="avatar-display avatar-large game-card rounded-full flex items-center justify-center mb-6 transition-all">
                     <span class="avatar-part" data-part="head"></span>
                     <span class="avatar-part" data-part="eyes"></span>
                     <span class="avatar-part" data-part="mouth"></span>
@@ -271,7 +286,8 @@
         <div id="level-select-screen" class="hidden">
             <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
                 <div class="flex items-center gap-4">
-                     <div id="avatar-display-level" class="avatar-display h-20 w-20 text-2xl game-card rounded-full flex items-center justify-center">
+                    <!-- Smaller avatar for header -->
+                     <div id="avatar-display-level" class="avatar-display h-20 w-20 text-3xl game-card rounded-full flex items-center justify-center">
                         <span class="avatar-part" data-part="head"></span>
                         <span class="avatar-part" data-part="eyes"></span>
                         <span class="avatar-part" data-part="mouth"></span>
@@ -474,7 +490,7 @@ const gameData = {
             id: 7, 
             title: "The Impostor", 
             category: "Focus: Analysis", 
-            unlocks: [4], 
+            unlocks: [4, 8], // Updated to unlock Level 8
             type: "find-the-flaw", 
             instructions: "Read the paragraph and tap the transition word that is used incorrectly.",
             questions: [
@@ -486,6 +502,46 @@ const gameData = {
                 { paragraph: "The concert was amazing. The band played all their famous songs. ##Consequently##, the lead singer had a fantastic voice. The crowd ##was## singing along all night.", options: ["Consequently", "was"], answer: "Consequently", explanation: "'Consequently' shows a result. The singer's voice is not a result of the band playing songs; it's an additional detail. 'Furthermore' or 'Moreover' would fit." },
                 { paragraph: "The hike was challenging. The trail was very steep. ##As a result##, the view from the top was a little disappointing. We ##still## had a good time, though.", options: ["As a result", "still"], answer: "As a result", explanation: "'As a result' implies the steep trail caused a disappointing view, which doesn't make sense. A contrast word like 'Although' or 'However' is needed at the start of the second sentence." },
                 { paragraph: "She is an ##expert## programmer. She can write code in five different languages. ##For instance##, she struggles with public speaking. She gets very ##nervous## in front of an audience.", options: ["expert", "For instance", "nervous"], answer: "For instance", explanation: "'For instance' introduces an example. Her struggle with public speaking is a contrasting point to her programming skill. 'On the other hand' would be a better fit." }
+            ]
+        },
+        { 
+            id: 8, 
+            title: "The Bridge Builder", 
+            category: "Mastery: Paragraphs", 
+            unlocks: [], 
+            type: "multiple-choice", 
+            instructions: "Choose the best transition to bridge the gap between the two paragraphs.",
+            questions: [
+                { 
+                    question: "<div class='p-3 bg-gray-100 dark:bg-gray-700 rounded mb-2 text-sm'>The school garden has provided fresh vegetables for the cafeteria all year. Students have learned how to plant, water, and harvest crops.</div><div class='font-bold text-center my-2 text-accent text-2xl'>⬇️</div><div class='p-3 bg-gray-100 dark:bg-gray-700 rounded mt-2 text-sm'>____, the garden has become a quiet space for students to read and relax during recess. It is more than just a source of food; it is a sanctuary.</div>", 
+                    options: ["However", "In addition to providing food", "For example", "Consequently"], 
+                    answer: "In addition to providing food", 
+                    explanation: "This phrase perfectly bridges the two paragraphs by acknowledging the first topic (food) and introducing the new topic (relaxation space)." 
+                },
+                { 
+                    question: "<div class='p-3 bg-gray-100 dark:bg-gray-700 rounded mb-2 text-sm'>Many people believe that video games are a waste of time. They argue that gaming keeps children indoors and prevents them from getting exercise.</div><div class='font-bold text-center my-2 text-accent text-2xl'>⬇️</div><div class='p-3 bg-gray-100 dark:bg-gray-700 rounded mt-2 text-sm'>____, studies have shown that video games can actually improve problem-solving skills and hand-eye coordination.</div>", 
+                    options: ["On the other hand", "Therefore", "Similarly", "For instance"], 
+                    answer: "On the other hand", 
+                    explanation: "The first paragraph presents one opinion, and the second presents an opposing view. 'On the other hand' signals this shift in perspective." 
+                },
+                { 
+                    question: "<div class='p-3 bg-gray-100 dark:bg-gray-700 rounded mb-2 text-sm'>The hikers struggled up the steep mountain path for hours. The wind howled, and the rain began to pour, making the rocks slippery and dangerous.</div><div class='font-bold text-center my-2 text-accent text-2xl'>⬇️</div><div class='p-3 bg-gray-100 dark:bg-gray-700 rounded mt-2 text-sm'>____, they reached the summit and saw the clouds part to reveal a stunning sunset. The difficult journey was worth it.</div>", 
+                    options: ["Initially", "Eventually", "For example", "In conclusion"], 
+                    answer: "Eventually", 
+                    explanation: "'Eventually' indicates that a significant amount of time and effort passed before the final outcome was reached." 
+                },
+                { 
+                    question: "<div class='p-3 bg-gray-100 dark:bg-gray-700 rounded mb-2 text-sm'>Electric cars are becoming more popular every year. They are quieter, cleaner, and cheaper to fuel than traditional gas vehicles.</div><div class='font-bold text-center my-2 text-accent text-2xl'>⬇️</div><div class='p-3 bg-gray-100 dark:bg-gray-700 rounded mt-2 text-sm'>____, there are still challenges to overcome, such as the lack of charging stations in rural areas.</div>", 
+                    options: ["Furthermore", "As a result", "However", "First"], 
+                    answer: "However", 
+                    explanation: "The first paragraph lists positives, while the second introduces a negative or a challenge. 'However' bridges this contrast." 
+                },
+                { 
+                    question: "<div class='p-3 bg-gray-100 dark:bg-gray-700 rounded mb-2 text-sm'>We have examined the historical evidence, the economic data, and the social impact of the revolution. All the facts point to a clear turning point in the century.</div><div class='font-bold text-center my-2 text-accent text-2xl'>⬇️</div><div class='p-3 bg-gray-100 dark:bg-gray-700 rounded mt-2 text-sm'>____, it is undeniable that this event changed the course of the nation forever.</div>", 
+                    options: ["Given these points", "In the beginning", "For instance", "On the contrary"], 
+                    answer: "Given these points", 
+                    explanation: "'Given these points' is an excellent way to transition from a body of evidence (Paragraph 1) to a final conclusion (Paragraph 2)." 
+                }
             ]
         },
         { id: 4, title: "Sentence Rewriting", category: "Mixed Practice", unlocks: [], type: "multiple-choice", instructions: "Choose the best way to rewrite the sentence(s) using a transition.", questions: [ 
@@ -661,8 +717,6 @@ function getDefaultGameState() {
         levelStats: { correct: 0, total: 0 }
     };
 }
-
-// ... all other functions are included below but collapsed for readability
 
 function showScreen(screen) {
     dom.homeScreen.classList.add('hidden');
@@ -1480,4 +1534,3 @@ document.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
 </html>
-
