@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <!-- Trust Signal: Clear and descriptive metadata for security scanners -->
-    <meta name="description" content="Transition Quest: A fun, free educational game for 8th-grade ELA students to practice using transition words. Safe, ad-free, and designed for the classroom.">
+    <meta name="description" content="Sentence Stitchers: A fun, free educational game for 8th-grade ELA students to practice using transition words. Safe, ad-free, and designed for the classroom.">
     <meta name="author" content="journeyholm">
     
-    <title>Transition Quest</title>
+    <title>Sentence Stitchers</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Bungee&display=swap" rel="stylesheet">
     <style>
@@ -201,25 +201,11 @@
 
         /* Avatar Styles */
         .avatar-display {
+            width: 120px;
+            height: 120px;
+            font-size: 3rem;
             position: relative;
-            overflow: hidden; /* Keep parts inside */
         }
-        
-        /* New Cooler & Larger Home Avatar Style */
-        .avatar-large {
-            width: 180px;
-            height: 180px;
-            font-size: 5rem;
-            border: 4px solid var(--accent);
-            box-shadow: 0 0 25px color-mix(in srgb, var(--accent) 30%, transparent);
-            animation: float-avatar 3s ease-in-out infinite;
-        }
-
-        @keyframes float-avatar {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-8px); }
-        }
-
         .avatar-part {
             position: absolute;
             left: 50%;
@@ -243,6 +229,15 @@
         .flaw-word:hover {
             background-color: color-mix(in srgb, var(--accent) 20%, transparent);
         }
+        
+        /* Star Styles */
+        .star-icon {
+            color: #f59e0b; /* amber-500 */
+            font-size: 1rem;
+        }
+        .star-icon.empty {
+            color: var(--border-color);
+        }
 
         #main-title {
             cursor: pointer;
@@ -263,7 +258,7 @@
                     <span class="avatar-part" data-part="eyes"></span>
                     <span class="avatar-part" data-part="mouth"></span>
                 </div>
-                <h1 id="main-title" class="text-6xl md:text-8xl font-bungee text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-green-400 mb-2">Transition Quest</h1>
+                <h1 id="main-title" class="text-6xl md:text-8xl font-bungee text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-green-400 mb-2">Sentence Stitchers</h1>
                 <p id="player-title-display" class="text-2xl font-semibold mb-4" style="color: var(--accent);"></p>
             </div>
             <p class="text-xl text-secondary mb-8" style="color: var(--text-secondary);">Master the art of connection in your writing!</p>
@@ -365,6 +360,7 @@
         <div id="feedback-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop hidden transition-opacity">
             <div class="modal-content w-full max-w-md p-6 rounded-lg shadow-xl text-center transform transition-transform scale-95 opacity-0">
                 <h3 id="feedback-title" class="text-3xl font-bold mb-2">Correct!</h3>
+                <div id="feedback-stars" class="text-4xl my-4 flex justify-center gap-2"></div>
                 <p id="feedback-text" class="text-lg mb-6">You're a transition wizard!</p>
                 <button id="next-question-btn" class="btn-primary w-full py-3 rounded-lg font-semibold">Continue</button>
             </div>
@@ -659,6 +655,7 @@ const dom = {
     feedbackModal: document.getElementById('feedback-modal'),
     feedbackTitle: document.getElementById('feedback-title'),
     feedbackText: document.getElementById('feedback-text'),
+    feedbackStars: document.getElementById('feedback-stars'),
     nextQuestionBtn: document.getElementById('next-question-btn'),
     levelMap: document.getElementById('level-map'),
     consumablesArea: document.getElementById('consumables-area'),
@@ -707,7 +704,8 @@ function getDefaultGameState() {
             },
             activeEffects: {
                 streakShield: false,
-            }
+            },
+            levelStars: {}
         },
         currentLevel: null,
         currentQuestionIndex: 0,
@@ -780,6 +778,7 @@ function loadProgress() {
             activeEffects: { ...gameState.playerData.activeEffects, ...(parsedData.activeEffects || {}) },
             unlockedAchievements: parsedData.unlockedAchievements || [],
             categoryStats: parsedData.categoryStats || {},
+            levelStars: parsedData.levelStars || {},
         };
         
         // Legacy save fixes
@@ -868,9 +867,21 @@ function renderLevelMap() {
         wrapper.className = "flex flex-col items-center gap-2 text-center";
 
         const node = document.createElement('div');
-        node.className = 'level-node w-20 h-20 rounded-full flex items-center justify-center text-2xl font-bold z-10 transition-all transform hover:scale-110 cursor-pointer shadow-md border-4';
+        node.className = 'level-node w-20 h-20 rounded-full flex items-center justify-center text-2xl font-bold z-10 transition-all transform hover:scale-110 cursor-pointer shadow-md border-4 flex-col';
         node.style.borderColor = 'var(--border-color)';
-        node.textContent = level.id;
+        
+        // Star display logic
+        const stars = gameState.playerData.levelStars[level.id] || 0;
+        let starsHtml = '';
+        if (stars > 0) {
+             starsHtml = `<div class="flex gap-0.5 mt-1">`;
+             for(let i=0; i<3; i++) {
+                 starsHtml += `<span class="text-[10px] ${i < stars ? 'text-yellow-400' : 'text-gray-400'}">★</span>`;
+             }
+             starsHtml += `</div>`;
+        }
+
+        node.innerHTML = `<span class="${stars > 0 ? '-mt-2' : ''}">${level.id}</span>${starsHtml}`;
         
         if (gameState.playerData.unlockedLevels.includes(level.id)) {
             node.classList.add('unlocked');
@@ -881,7 +892,8 @@ function renderLevelMap() {
                 node.classList.add('completed');
                 node.style.backgroundColor = '#10b981'; // Emerald green
                 node.style.borderColor = '#059669';
-                node.innerHTML += '<span class="absolute text-3xl">✔</span>';
+                // Checkmark is redundant with stars now, but can keep or remove. Let's keep it subtle if no stars, or remove.
+                // Let's remove the big checkmark to focus on stars, or just keep stars.
             }
             node.onclick = () => selectLevel(level.id);
         } else {
@@ -1084,6 +1096,21 @@ function levelComplete() {
         });
     }
 
+    // Calculate stars
+    let stars = 1;
+    if (level.type === 'dynamic-story') {
+        stars = 3; // Stories award 3 stars for completion
+    } else {
+        const accuracy = (gameState.levelStats.correct / gameState.levelStats.total) * 100;
+        if (accuracy === 100) stars = 3;
+        else if (accuracy >= 80) stars = 2;
+    }
+    
+    // Save better star result
+    if (!gameState.playerData.levelStars[level.id] || stars > gameState.playerData.levelStars[level.id]) {
+        gameState.playerData.levelStars[level.id] = stars;
+    }
+
     checkAchievements(true);
     saveProgress();
     
@@ -1099,7 +1126,7 @@ function levelComplete() {
     else { summaryText += ` You've completed all available levels! Great work!`; }
 
     dom.nextQuestionBtn.textContent = 'Back to World Map';
-    showFeedbackModal('level-complete', summaryText, `Level ${level.id} Complete!`);
+    showFeedbackModal('level-complete', summaryText, `Level ${level.id} Complete!`, stars);
     
     dom.nextQuestionBtn.onclick = () => {
         hideFeedbackModal();
@@ -1114,11 +1141,24 @@ function updateProgressBar(questionCompleted = false) {
     dom.progressBar.style.width = `${(completedCount / questionsCount) * 100}%`;
 }
 
-function showFeedbackModal(type, text, title) {
+function showFeedbackModal(type, text, title, stars = 0) {
     const modal = dom.feedbackModal;
     const content = modal.querySelector('.modal-content');
     dom.feedbackTitle.textContent = title;
     dom.feedbackTitle.className = 'text-3xl font-bold mb-2 ';
+    
+    dom.feedbackStars.innerHTML = '';
+    if (type === 'level-complete' && stars > 0) {
+        let starsHtml = '';
+        for(let i=0; i<3; i++) {
+             starsHtml += `<span class="${i < stars ? 'text-yellow-400' : 'text-gray-300'}">★</span>`;
+        }
+        dom.feedbackStars.innerHTML = starsHtml;
+        dom.feedbackStars.classList.remove('hidden');
+    } else {
+        dom.feedbackStars.classList.add('hidden');
+    }
+
     switch(type) {
         case true: dom.feedbackTitle.classList.add('text-green-600', 'dark:text-green-400'); break;
         case false: dom.feedbackTitle.classList.add('text-red-600', 'dark:text-red-400'); break;
