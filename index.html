@@ -781,6 +781,10 @@ function loadProgress() {
         if (!gameState.playerData.inventory.avatarParts) {
             gameState.playerData.inventory.avatarParts = ['head-smile', 'eyes-default', 'mouth-default'];
         }
+        // Force unlock level 1 if not present - Fix for stuck save states
+        if (!gameState.playerData.unlockedLevels.includes(1)) {
+            gameState.playerData.unlockedLevels.push(1);
+        }
     } else {
         gameState = getDefaultGameState();
     }
@@ -852,14 +856,9 @@ function applyTheme(themeId, save = true) {
 function renderLevelMap() {
     dom.levelMap.innerHTML = '';
     
-    const pathContainer = document.createElement('div');
-    pathContainer.className = "absolute top-1/2 -translate-y-1/2 left-0 right-0 h-2";
-    let pathHtml = `<div class="relative h-full mx-auto" style="width: ${100 - (100 / gameData.levels.length)}%"><div class="h-full level-path"></div></div>`;
-    pathContainer.innerHTML = pathHtml;
-    dom.levelMap.appendChild(pathContainer);
-
     const container = document.createElement('div');
-    container.className = "relative flex justify-between items-start";
+    // Changed to Grid Layout for better responsiveness with 8 levels
+    container.className = "grid grid-cols-2 sm:grid-cols-4 gap-8 justify-items-center relative z-10";
     dom.levelMap.appendChild(container);
 
     gameData.levels.forEach((level) => {
@@ -867,25 +866,32 @@ function renderLevelMap() {
         wrapper.className = "flex flex-col items-center gap-2 text-center";
 
         const node = document.createElement('div');
-        node.className = 'level-node w-20 h-20 rounded-full flex items-center justify-center text-2xl font-bold z-10 transition-all transform hover:scale-110';
+        node.className = 'level-node w-20 h-20 rounded-full flex items-center justify-center text-2xl font-bold z-10 transition-all transform hover:scale-110 cursor-pointer shadow-md border-4';
+        node.style.borderColor = 'var(--border-color)';
         node.textContent = level.id;
         
         if (gameState.playerData.unlockedLevels.includes(level.id)) {
             node.classList.add('unlocked');
+            node.style.borderColor = 'var(--accent)';
+            node.style.backgroundColor = 'var(--accent)';
+            
             if (gameState.playerData.completedLevels.includes(level.id)) {
                 node.classList.add('completed');
+                node.style.backgroundColor = '#10b981'; // Emerald green
+                node.style.borderColor = '#059669';
                 node.innerHTML += '<span class="absolute text-3xl">✔</span>';
             }
             node.onclick = () => selectLevel(level.id);
         } else {
-             node.innerHTML = `<svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>`;
+             node.innerHTML = `<svg class="w-8 h-8 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>`;
+             node.style.cursor = 'not-allowed';
         }
         
         const title = document.createElement('p');
-        title.className = "font-semibold w-24";
+        title.className = "font-semibold text-sm max-w-[100px]";
         title.textContent = level.title;
 
-        if (level.category.startsWith('Focus:')) {
+        if (level.category.startsWith('Focus:') || level.category.startsWith('Mastery:')) {
             node.classList.add('category-focus');
             title.style.color = 'var(--accent)';
         }
