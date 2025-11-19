@@ -765,28 +765,30 @@ function saveProgress() {
 }
 
 function loadProgress() {
+    // Always start with a fresh default state to ensure all structural properties exist
+    gameState = getDefaultGameState();
+    
     const savedData = localStorage.getItem('transitionQuestData');
     if (savedData) {
-        const defaultData = getDefaultGameState().playerData;
         const parsedData = JSON.parse(savedData);
+        // Merge saved player data into the default state
         gameState.playerData = {
-            ...defaultData,
+            ...gameState.playerData, // Keep defaults for any new fields
             ...parsedData,
-            inventory: { ...defaultData.inventory, ...(parsedData.inventory || {}) },
-            equipped: { ...defaultData.equipped, ...(parsedData.equipped || {}) },
-            activeEffects: { ...defaultData.activeEffects, ...(parsedData.activeEffects || {}) },
+            inventory: { ...gameState.playerData.inventory, ...(parsedData.inventory || {}) },
+            equipped: { ...gameState.playerData.equipped, ...(parsedData.equipped || {}) },
+            activeEffects: { ...gameState.playerData.activeEffects, ...(parsedData.activeEffects || {}) },
             unlockedAchievements: parsedData.unlockedAchievements || [],
             categoryStats: parsedData.categoryStats || {},
         };
+        
+        // Legacy save fixes
         if (!gameState.playerData.inventory.avatarParts) {
             gameState.playerData.inventory.avatarParts = ['head-smile', 'eyes-default', 'mouth-default'];
         }
-        // Force unlock level 1 if not present - Fix for stuck save states
         if (!gameState.playerData.unlockedLevels.includes(1)) {
             gameState.playerData.unlockedLevels.push(1);
         }
-    } else {
-        gameState = getDefaultGameState();
     }
 }
 
